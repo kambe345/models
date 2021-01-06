@@ -80,6 +80,8 @@ celerybeat-schedule
 
 # dotenv
 .env
+.envrc
+.direnv
 
 # virtualenv
 venv/
@@ -96,3 +98,6 @@ ENV/
 
 # For mac
 .DS_Store
+
+
+road_heating/
