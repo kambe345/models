@@ -74,10 +74,6 @@ def preprocess_image_and_label(image,
                        'a model_variant. See feature_extractor.network_map for '
                        'supported model variants.')
 
-  print('AAAAA\n\n\nn\n\n\n\n\n\n\n\n\n\n\n\n\n\n')
-
-  print(label, image)  
-
   # Keep reference to original image.
   original_image = image
 

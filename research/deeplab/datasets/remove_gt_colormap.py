@@ -25,6 +25,7 @@ import numpy as np
 from PIL import Image
 
 import tensorflow as tf
+from deeplab.utils import get_dataset_colormap
 
 FLAGS = tf.compat.v1.flags.FLAGS
 
@@ -38,6 +39,8 @@ tf.compat.v1.flags.DEFINE_string('output_dir',
                                  './road_heating/SegmentationClassRaw',
                                  'folder to save modified ground truth annotations.')
 
+road_heating_colormap = get_dataset_colormap.create_road_heating_label_colormap()
+
 
 def _remove_colormap(filename):
     """Removes the color map from the annotation.
@@ -48,7 +51,15 @@ def _remove_colormap(filename):
     Returns:
       Annotation without color map.
     """
-    return np.array(Image.open(filename))
+    # パレットモードに
+    pil_image = Image.open(filename)
+    image = np.array(pil_image)
+    for index, colormap in enumerate(road_heating_colormap):
+      image = np.where(image == colormap, index, image)
+
+    image = image[:,:,0]
+
+    return image
 
 
 def _save_annotation(annotation, filename):
@@ -79,6 +90,7 @@ def main(unused_argv):
                          os.path.join(
                              FLAGS.output_dir,
                              filename + '.' + FLAGS.segmentation_format))
+
 
 
 if __name__ == '__main__':

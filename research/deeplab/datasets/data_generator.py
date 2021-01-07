@@ -105,7 +105,7 @@ _ROAD_HEATING_INFORMATION = DatasetDescriptor(
         'trainval': 152,
         'val': 38,
     },
-    num_classes=4,
+    num_classes=21,
     ignore_label=255,
 )
 

@@ -38,6 +38,7 @@ _ADE20K = 'ade20k'
 _CITYSCAPES = 'cityscapes'
 _MAPILLARY_VISTAS = 'mapillary_vistas'
 _PASCAL = 'pascal'
+_ROAD_HEATING = 'road_heating'
 
 # Max number of entries in the colormap for each dataset.
 _DATASET_MAX_ENTRIES = {
@@ -45,6 +46,7 @@ _DATASET_MAX_ENTRIES = {
     _CITYSCAPES: 256,
     _MAPILLARY_VISTAS: 66,
     _PASCAL: 512,
+    _ROAD_HEATING:256,
 }
 
 
@@ -331,6 +333,17 @@ def create_pascal_label_colormap():
   return colormap
 
 
+def create_road_heating_label_colormap():
+
+  colormap = np.array([
+    [0,0,0], # Background
+    [50,183,250], # Snow,
+    [255, 96,55], # Road
+    [131,224,112], # Obstacle
+  ])
+
+  return colormap
+
 def get_ade20k_name():
   return _ADE20K
 
@@ -380,6 +393,8 @@ def create_label_colormap(dataset=_PASCAL):
     return create_mapillary_vistas_label_colormap()
   elif dataset == _PASCAL:
     return create_pascal_label_colormap()
+  elif dataset == _ROAD_HEATING:
+    return create_road_heating_label_colormap()
   else:
     raise ValueError('Unsupported dataset.')
 
