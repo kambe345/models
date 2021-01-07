@@ -1,5 +1,25 @@
 https://github.com/tensorflow/models をフォーク
 
+
+環境
+133.87.136.2のkambeのホームディレクトリに`sing-tensorflow`というコンテナがあるのでこれを自分のホームディレクトリ等にコピーして使ってください(tensorflow-gpu==1.15.0の環境)
+
+下記のようにすることで，実行できる
+```
+singularity exec --nv ~/sing-tensorflow python **.py
+```
+~/.bashrcに
+```
+alias sing='singularity exec --nv ~/sing-tensorflow'
+```
+のようにaliasを設定しておくと楽
+
+参考:[singularityの使い方](https://harmony-lab.esa.io/posts/6)
+
+以下では，singularity コンテナで作業を行う．（シンギュラリティ部分は省略）
+
+<br>
+
 reserach/deeplab/を使用
 
 学習方法
@@ -13,7 +33,7 @@ reserach/deeplab/を使用
 colormap = np.array([
     [0,0,0], # Background
     [50,183,250], # Snow,
-    [255, 96,55], # Road
+    [255,96,55], # Road
     [131,224,112], # Obstacle
 ])
 
@@ -26,6 +46,39 @@ return colormap
 ```bash
 mkdir road_heating/tfrecord
 python build_voc2012_data.py --image_format="jpg"
+```
+
+この時点で以下のようにデータが配置されているはず
+
+```
+road_heating/
+├─class_names.txt
+│
+├─ImageSets
+│  └─Segmentation
+│          train.txt
+│          trainval.txt
+│          val.txt
+│
+├─JPEGImages
+│      001.jpg
+│      002.jpg
+│      003.jpg
+│
+├─SegmentationClass
+│      001.png
+│      002.png
+│      003.png
+│
+├─SegmentationClassRaw
+│      001.jpg
+│      002.jpg
+│      003.jpg
+│
+└─tfrecord
+        001.tfrecord
+        002.tfrecord
+        003.tfrecord
 ```
 6. `data_generator.py`を修正 (102行目くらい)
     - train, trainval, valの数字をそれぞれのデータ数に変更 (make_trainval.pyの実行時にそれぞれの数が出力される)
@@ -40,9 +93,18 @@ _ROAD_HEATING_INFORMATION = DatasetDescriptor(
     ignore_label=255,
 )
 ```
+
 7. パスを通す．reserach/で以下を実行.起動のたびに必要なので，面倒だったら~/.bashrcに記載
 ```bash
 export PYTHONPATH=$PYTHONPATH:`pwd`:`pwd`/slim
+```
+
+8. 学習済みモデルを入手
+```bash
+mkdir road_heating/init_model/
+wget http://download.tensorflow.org/models/deeplabv3_pascal_train_aug_2018_01_04.tar.gz
+mv deeplabv3_pascal_train_aug_2018_01_04.tar.gz road_heating/init_model
+tar -xvf deeplabv3_pascal_train_aug_2018_01_04.tar.gz
 ```
 
 7. 以下を実行して学習 
@@ -50,15 +112,15 @@ export PYTHONPATH=$PYTHONPATH:`pwd`:`pwd`/slim
     - --training_number_of_stepsで学習回数変更(epochではないことに注意)
 
 ```
-python train.py --logtostderr --training_number_of_steps=1000 --train_split="train" --model_variant="xception_65" --atrous_rates=6 --atrous_rates=12 --atrous_rates=18 --output_stride=16 --decoder_output_stride=4 --train_crop_size="513,513" --train_batch_size=4 --dataset="road_heating" --train_logdir="./datasets/road_heating/exp/train_on_trainval_set/train" --dataset_dir="./datasets/road_heating/tfrecord" --fine_tune_batch_norm=false --initialize_last_layer=true --last_layers_contain_logits_only=false
+python train.py --logtostderr --training_number_of_steps=1000 --model_variant="xception_65" --atrous_rates=6 --atrous_rates=12 --atrous_rates=18  --decoder_output_stride=4 --train_batch_size=4 --dataset="road_heating" --train_logdir="./datasets/road_heating/exp/train_on_trainval_set/train" --dataset_dir="./datasets/road_heating/tfrecord" --fine_tune_batch_norm=false --initialize_last_layer=true --last_layers_contain_logits_only=false  --tf_initial_checkpoint="./datasets/pascal_voc_seg/init_models/deeplabv3_pascal_train_aug/model.ckpt"
 ```
 8.  評価
 ```
-python eval.py   --logtostderr   --vis_split="val"   --model_variant="xception_65"   --atrous_rates=6   --atrous_rates=12   --atrous_rates=18   --output_stride=16   --decoder_output_stride=4   --vis_crop_size="513,513"   --checkpoint_dir="./datasets/road_heating/exp/train_on_trainval_set/train"   --eval_logdir="./datasets/road_heating/exp/train_on_trainval_set/eval"  --dataset_dir="./datasets/road_heating/tfrecord"   --max_number_of_iterations=1 --dataset=road_heating
+python eval.py   --logtostderr   --model_variant="xception_65"   --atrous_rates=6   --atrous_rates=12   --atrous_rates=18   --output_stride=16   --decoder_output_stride=4   --checkpoint_dir="./datasets/road_heating/exp/train_on_trainval_set/train"   --eval_logdir="./datasets/road_heating/exp/train_on_trainval_set/eval"  --dataset_dir="./datasets/road_heating/tfrecord"   --max_number_of_iterations=1 --dataset=road_heating
 ```
 9. 可視化　(`road_heating/exp/vis/segmentation_results`に出力)
 ```
-python vis.py   --logtostderr   --vis_split="val"   --model_variant="xception_65"   --atrous_rates=6   --atrous_rates=12   --atrous_rates=18   --output_stride=16   --decoder_output_stride=4   --vis_crop_size="513,513"   --checkpoint_dir="./datasets/road_heating/exp/train_on_trainval_set/train"   --vis_logdir="./datasets/road_heating/exp/train_on_trainval_set/vis"  --dataset_dir="./datasets/road_heating/tfrecord"   --max_number_of_iterations=1 --dataset=road_heating
+python vis.py   --logtostderr --model_variant="xception_65"   --atrous_rates=6   --atrous_rates=12   --atrous_rates=18   --output_stride=16   --decoder_output_stride=4   --checkpoint_dir="./datasets/road_heating/exp/train_on_trainval_set/train"   --vis_logdir="./datasets/road_heating/exp/train_on_trainval_set/vis"  --dataset_dir="./datasets/road_heating/tfrecord"   --max_number_of_iterations=1 --dataset=road_heating
 ```
 
 引数の説明とかも参考にのってる
