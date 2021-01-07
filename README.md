@@ -30,7 +30,7 @@ reserach/deeplab/を使用
 ```bash
 export PYTHONPATH=$PYTHONPATH:`pwd`:`pwd`/slim
 ```
-1. `datasets/road_heating/make_trainval.py` を実行
+4. `datasets/road_heating/make_trainval.py` を実行
     - `road_heating/Imagesets/Segmenntation`にtrain.txt, val.txt, trainval.txtがあることを確認
 1. `deeplab/utils/get_dataset_colormap.py`を修正 (340行目くらい)
     - カラーマップをcvatで設定したものにする(1/7時点ではcvatのカラーマップに準拠)
@@ -45,7 +45,7 @@ colormap = np.array([
 return colormap
 ```
 
-1. `remove_gt_colormap.py `を実行
+6. `remove_gt_colormap.py `を実行
     - `road_heating/SegmentationClassRaw`が出来ていることを確認
 1. 以下を実行
 ```bash
@@ -84,7 +84,7 @@ road_heating/
         002.tfrecord
         003.tfrecord
 ```
-6. `data_generator.py`を修正 (102行目くらい)
+8. `data_generator.py`を修正 (102行目くらい)
     - train, trainval, valの数字をそれぞれのデータ数に変更 (make_trainval.pyの実行時にそれぞれの数が出力される)
     - 学習済みモデルを使うので，num_classesはそのまま
 ```python:data_generator.py
@@ -101,7 +101,7 @@ _ROAD_HEATING_INFORMATION = DatasetDescriptor(
 
 
 
-8. 学習済みモデルを入手
+9. 学習済みモデルを入手
 ```bash
 mkdir road_heating/init_models/
 wget http://download.tensorflow.org/models/deeplabv3_pascal_train_aug_2018_01_04.tar.gz
@@ -109,18 +109,18 @@ mv deeplabv3_pascal_train_aug_2018_01_04.tar.gz road_heating/init_model
 tar -xvf deeplabv3_pascal_train_aug_2018_01_04.tar.gz
 ```
 
-7. 以下を実行して学習 
+10. 以下を実行して学習 
     - --train_log_dirにチェックポイントがあるとそれを読み込んでしまうので，何回も学習する場合は別のディレクトリを指定する必要あり
     - --training_number_of_stepsで学習回数変更(epochではないことに注意)
 
 ```
 sing python train.py --logtostderr --training_number_of_steps=1000 --model_variant="xception_65" --atrous_rates=6 --atrous_rates=12 --atrous_rates=18  --decoder_output_stride=4 --train_batch_size=4 --dataset="road_heating" --train_logdir="./datasets/road_heating/exp/train_on_trainval_set/train" --dataset_dir="./datasets/road_heating/tfrecord" --fine_tune_batch_norm=false --initialize_last_layer=true --last_layers_contain_logits_only=false  --tf_initial_checkpoint="./datasets/road_heating/init_models/deeplabv3_pascal_train_aug/model.ckpt"
 ```
-8.  評価(多分終了しないので，miouが出力された時点で終了する)
+11.  評価(多分終了しないので，miouが出力された時点で終了する)
 ```
 sing python eval.py   --logtostderr   --model_variant="xception_65"   --atrous_rates=6   --atrous_rates=12   --atrous_rates=18   --output_stride=16   --decoder_output_stride=4   --checkpoint_dir="./datasets/road_heating/exp/train_on_trainval_set/train"   --eval_logdir="./datasets/road_heating/exp/train_on_trainval_set/eval"  --dataset_dir="./datasets/road_heating/tfrecord"   --max_number_of_iterations=1 --dataset=road_heating
 ```
-9. 可視化　(`road_heating/exp/vis/segmentation_results`に出力)
+12. 可視化　(`road_heating/exp/vis/segmentation_results`に出力)
 ```
 sing python vis.py   --logtostderr --model_variant="xception_65"   --atrous_rates=6   --atrous_rates=12   --atrous_rates=18   --output_stride=16   --decoder_output_stride=4   --checkpoint_dir="./datasets/road_heating/exp/train_on_trainval_set/train"   --vis_logdir="./datasets/road_heating/exp/train_on_trainval_set/vis"  --dataset_dir="./datasets/road_heating/tfrecord"   --max_number_of_iterations=1 --dataset=road_heating
 ```
