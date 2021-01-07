@@ -101,9 +101,9 @@ _ADE20K_INFORMATION = DatasetDescriptor(
 
 _ROAD_HEATING_INFORMATION = DatasetDescriptor(
     splits_to_sizes={
-        'train': 190,
-        'trainval': 152,
-        'val': 38,
+        'train': 285,
+        'trainval': 228,
+        'val': 57,
     },
     num_classes=21,
     ignore_label=255,
