@@ -74,6 +74,10 @@ def preprocess_image_and_label(image,
                        'a model_variant. See feature_extractor.network_map for '
                        'supported model variants.')
 
+  print('AAAAA\n\n\nn\n\n\n\n\n\n\n\n\n\n\n\n\n\n')
+
+  print(label, image)  
+
   # Keep reference to original image.
   original_image = image
 
@@ -125,6 +129,16 @@ def preprocess_image_and_label(image,
   if is_training and label is not None:
     processed_image, label = preprocess_utils.random_crop(
         [processed_image, label], crop_height, crop_width)
+  else:
+    rr = tf.minimum(tf.cast(crop_height,tf.float32)/tf.cast(image_height,tf.float32),\
+            tf.cast(crop_width,tf.float32)/tf.cast(image_width,tf.float32))
+    newh = tf.cast(tf.cast(image_height, tf.float32)*rr, tf.int32)
+    neww = tf.cast((tf.cast(image_width, tf.float32)*rr), tf.int32)
+    processed_image = tf.image.resize_images(
+        processed_image, (newh, neww), method=tf.image.ResizeMethod.BILINEAR, align_corners=True)
+    processed_image = preprocess_utils.pad_to_bounding_box(
+                        processed_image, 0, 0, crop_height, crop_width, mean_pixel)
+
 
   processed_image.set_shape([crop_height, crop_width, 3])
 
