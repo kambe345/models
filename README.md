@@ -2,15 +2,15 @@ https://github.com/tensorflow/models をフォーク
 
 
 環境
-133.87.136.2のkambeのホームディレクトリに`sing-tensorflow`というコンテナがあるのでこれを自分のホームディレクトリ等にコピーして使ってください(tensorflow-gpu==1.15.0の環境)
+133.87.136.2のkambeのホームディレクトリに`sing-tensorflow.sif`というイメージファイルがあるのでこれを自分のホームディレクトリ等にコピーして使ってください(tensorflow-gpu==1.15.0の環境)
 
 下記のようにすることで，実行できる
 ```
-singularity exec --nv ~/sing-tensorflow python **.py
+singularity exec --nv ~/sing-tensorflow.sif python **.py
 ```
 ~/.bashrcに
 ```
-alias sing='singularity exec --nv ~/sing-tensorflow'
+alias sing='singularity exec --nv ~/sing-tensorflow.sif'
 ```
 のようにaliasを設定しておくと楽
 
